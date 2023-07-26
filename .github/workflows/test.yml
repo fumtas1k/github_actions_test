@@ -21,9 +21,9 @@ jobs:
         run: |
           shopt -s nocasematch
           CHANGES="$(gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }})"
-          if [[ "$CHANGES" =~ "insert into " ]]; then
-            cat << EOF > ./comment
-              :mega: 注意注意 :mega:
-            EOF
-            gh pr comment ${{ github.event.pull_request.number }} -F ./comment --repo ${{ github.repository }}
+          if [[ ! "$CHANGES" =~ "insert into " ]]; then
+            exit 0
           fi
+
+          echo ":mega: 注意注意 :mega:" > ./comment
+          gh pr comment ${{ github.event.pull_request.number }} -F ./comment --repo ${{ github.repository }}
