@@ -1,0 +1,26 @@
+name: Hello World
+
+on:
+  pull_request:
+    types: [ opened, labeled, synchronize, reopened ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get changed files
+        run: |
+          git diff --name-only
+
+      - name: Add changed files to PR comment
+        run: |
+          for file in $(git diff --name-only); do
+            gh pr comment "ファイル $file が変更されました。"
+          done
