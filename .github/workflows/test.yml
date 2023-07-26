@@ -21,6 +21,11 @@ jobs:
 
       - name: Add changed files to PR comment
         run: |
-          for file in $(git diff main...HEAD --name-only); do
-            gh pr comment "ファイル $file が変更されました。" ${{ github.event.pull_request.html_url }}
-          done
+          shopt -s nocasematch
+          CHANGES="$(gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }})"
+          if [[ "$CHANGES" =~ "insert into " ]]; then
+            cat << EOF > ./comment
+              :mega: 注意注意 :mega:
+            EOF
+            gh pr comment ${{ github.event.pull_request.number }} -F ./comment --repo ${{ github.repository }}
+          fi
