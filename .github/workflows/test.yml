@@ -17,7 +17,7 @@ jobs:
 
       - name: Add changed files to PR comment
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           shopt -s nocasematch
           CHANGES="$(gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }})"
