@@ -15,12 +15,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Get changed files
-        run: |
-          git diff --name-only
-
       - name: Add changed files to PR comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          for file in $(git diff --name-only); do
-            gh pr comment "ファイル $file が変更されました。"
-          done
+          shopt -s nocasematch
+          CHANGES="$(gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }})"
+          echo "$CHANGES"
+          if [[ ! "$CHANGES" =~ "insert into " ]] && [[ ! "$CHANGES" =~ "update " ]]; then
+            exit 0
+          fi
+
+          echo ":mega: 注意 sqlをdev1環境でEXPLAIN ANALYZEで実行し処理が遅くないか確認して下さい。 :mega:" > ./comment
+          gh pr comment ${{ github.event.pull_request.number }} -F ./comment --repo ${{ github.repository }}
