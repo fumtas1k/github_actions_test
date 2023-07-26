@@ -15,10 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Get changed files
-        run: |
-          git diff main...HEAD --name-only
-
       - name: Add changed files to PR comment
         run: |
           shopt -s nocasematch
