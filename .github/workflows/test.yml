@@ -22,5 +22,5 @@ jobs:
       - name: Add changed files to PR comment
         run: |
           for file in $(git diff --name-only); do
-            gh pr comment "ファイル $file が変更されました。"
+          gh pr comment -F ./comments "ファイル $file が変更されました。"
           done
