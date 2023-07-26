@@ -22,6 +22,7 @@ jobs:
           shopt -s nocasematch
           CHANGES="$(gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }})"
           echo "$CHANGES"
+          echo $(gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --name-only)
           if [[ ! "$CHANGES" =~ "insert into " ]] && [[ ! "$CHANGES" =~ "update " ]]; then
             exit 0
           fi
