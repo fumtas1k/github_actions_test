@@ -20,13 +20,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           shopt -s nocasematch
-          CHANGES="$(gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }})"
-          echo "$CHANGES"
-          echo $(gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --name-only)
-          echo ${{ steps.changed-files.outputs.all_changed_and_modified_files }}
-          if [[ ! "$CHANGES" =~ "insert into " ]] && [[ ! "$CHANGES" =~ "update " ]]; then
-            exit 0
-          fi
-
-          echo ":mega: 注意 sqlをdev1環境でEXPLAIN ANALYZEで実行し処理が遅くないか確認して下さい。 :mega:" > ./comment
-          gh pr comment ${{ github.event.pull_request.number }} -F ./comment --repo ${{ github.repository }}
+          for file in ${{ steps.changed-files.outputs.all_changed_and_modified_files }}; do
+            if [[ "$file" =~ ".*\.sql" ]]; then
+              content="$(cat $file)"
+              if [[ "$content" =~ "insert into " ]] || [[ "$content" =~ "update " ]]; then
+                echo ":mega: 注意 sqlをdev1環境でEXPLAIN ANALYZEで実行し処理が遅くないか確認して下さい。 :mega:" > ./comment
+                gh pr comment ${{ github.event.pull_request.number }} -F ./comment --repo ${{ github.repository }}
+                exit 1
+              fi
+            fi
+          done
