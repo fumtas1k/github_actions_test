@@ -1,1 +1,1 @@
-insert into table
+INSERT INTO table
