@@ -1,1 +1,1 @@
-select table
+INSERT INTO table
