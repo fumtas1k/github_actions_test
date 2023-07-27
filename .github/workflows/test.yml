@@ -14,17 +14,24 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-
+      - name: Get changed files in migration directories
+        id: changed-files
+        uses: tj-actions/changed-files@v36
+        with:
+          files: |
+            src/*.sql
       - name: Add changed files to PR comment
+        if: steps.changed-files.outputs.any_changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           shopt -s nocasematch
-          CHANGES="$(gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }})"
-          echo "$CHANGES"
-          if [[ ! "$CHANGES" =~ "insert into " ]] && [[ ! "$CHANGES" =~ "update " ]]; then
-            exit 0
-          fi
-
-          echo ":mega: 注意 sqlをdev1環境でEXPLAIN ANALYZEで実行し処理が遅くないか確認して下さい。 :mega:" > ./comment
-          gh pr comment ${{ github.event.pull_request.number }} -F ./comment --repo ${{ github.repository }}
+          for file in ${{ steps.changed-files.outputs.all_changed_and_modified_files }}; do
+            echo "$file"
+            content="$(cat $file)"
+            if [[ "$content" =~ "insert into " ]] || [[ "$content" =~ "update " ]]; then
+              echo ":mega:このプルリクエストにはINSERT/UPDATE文が含まれています。以下のチェックリストを確認して下さい。\n* [ ] dev1でEXPLAIN ANALYZEを実行し処理が遅くないか(10sec以上)確認した.\n" > ./comment
+              gh pr comment ${{ github.event.pull_request.number }} -F ./comment --repo ${{ github.repository }}
+              exit 0
+            fi
+          done
