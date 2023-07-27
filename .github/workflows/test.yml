@@ -28,12 +28,10 @@ jobs:
           shopt -s nocasematch
           for file in ${{ steps.changed-files.outputs.all_changed_and_modified_files }}; do
             echo "$file"
-            if [[ "$file" =~ ".*\.sql" ]]; then
-              content="$(cat $file)"
-              if [[ "$content" =~ "insert into " ]] || [[ "$content" =~ "update " ]]; then
-                echo ":mega: 注意 sqlをdev1環境でEXPLAIN ANALYZEで実行し処理が遅くないか確認して下さい。 :mega:" > ./comment
-                gh pr comment ${{ github.event.pull_request.number }} -F ./comment --repo ${{ github.repository }}
-                exit 1
-              fi
+            content="$(cat $file)"
+            if [[ "$content" =~ "insert into " ]] || [[ "$content" =~ "update " ]]; then
+              echo ":mega: 注意 sqlをdev1環境でEXPLAIN ANALYZEで実行し処理が遅くないか確認して下さい。 :mega:" > ./comment
+              gh pr comment ${{ github.event.pull_request.number }} -F ./comment --repo ${{ github.repository }}
+              exit 1
             fi
           done
