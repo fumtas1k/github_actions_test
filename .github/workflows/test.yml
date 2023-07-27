@@ -27,6 +27,7 @@ jobs:
         run: |
           shopt -s nocasematch
           for file in ${{ steps.changed-files.outputs.all_changed_and_modified_files }}; do
+            echo "$file"
             if [[ "$file" =~ ".*\.sql" ]]; then
               content="$(cat $file)"
               if [[ "$content" =~ "insert into " ]] || [[ "$content" =~ "update " ]]; then
