@@ -2,7 +2,7 @@ name: Hello World
 
 on:
   pull_request:
-    types: [ opened, synchronize, reopened ]
+    types: [ opened, labeled, synchronize, reopened ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -30,17 +30,8 @@ jobs:
             echo "$file"
             content="$(cat $file)"
             if [[ "$content" =~ "insert into " ]] || [[ "$content" =~ "update " ]]; then
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: `このプルリクエストにはINSERT/UPDATE文が含まれています。以下のチェックリストを確認して下さい。
-
-                  チェックリスト
-                  * [ ] dev1でEXPLAIN ANALYZEを実行し処理が遅くないか(10sec以上)確認した.
-
-                `.replace(/\n +/g, '\n')
-              })
+              echo ":mega:このプルリクエストにはINSERT/UPDATE文が含まれています。以下のチェックリストを確認して下さい。\n* [ ] dev1でEXPLAIN ANALYZEを実行し処理が遅くないか(10sec以上)確認した.\n" > ./comment
+              gh pr comment ${{ github.event.pull_request.number }} -F ./comment --repo ${{ github.repository }}
               exit 0
             fi
           done
